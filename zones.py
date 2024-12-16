@@ -347,3 +347,5 @@ def showTavern(world, player):
 	stay_leave = input("What will you do? (Stay the night (10G); Leave): ")
 	option = stay_leave
 	getValidInput(option)
+	
+	# test to see if the new commit worked
