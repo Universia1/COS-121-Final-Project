@@ -1,0 +1,3 @@
+Player data: {'name': 'DON', 'maxHP': 50, 'HP': 50, 'held_weapon': ['basic stick'], 'current_G': 0, 'base_atk': 0, 'inventory': {}}Final player data: player name: DON, player inventory: {}, G: 0, base atk: 0, held weapon: ['basic stick']
+Final player data: player name: YUN, player inventory: {'health potion': 1}, G: 30, base atk: 0, held weapon: ['blade of cinders']
+Final player data: player name: DON, player inventory: {}, G: 0, base atk: 0, held weapon: ['basic stick']
