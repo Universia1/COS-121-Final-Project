@@ -269,12 +269,12 @@ def initializeShopStock():
 	"maxhp up": 5,
 	"shield": 1
 	}
-							
+		
+shop_stock = initializeShopStock()
+																	
 def showShop(world, player):
 	print("You enter the shop and see shelves lined with all sorts of items and potions.")
 	print("The shopkeeper greets you warmly and then asks if you will buy or sell.")
-	
-	shop_stock = initializeShopStock()
 	
 	item_prices = {
 		"health potion": 5,
@@ -283,37 +283,42 @@ def showShop(world, player):
 		"maxhp up": 30
 	}
 	
+	max_shop_stock = {
+		"health potion": 999,
+		"atk up": 5,
+		"maxhp up": 5,
+		"shield": 1
+	}
+	
 	while True:
 		shop_action = input("What will you do? (1: Buy; 2: Sell; 3: Leave): ") 
 		if shop_action == "1": # if player chooses to buy
-			print(f"Your G: {player['current_G']}")
-			print("\nAvailable items:")
-			for item, details in shop_stock.items():
-				print(f"{item.capitalize()} - {details['price']}G (x{details['quantity']})")
-				
+			print(f"\nYour G: {player['current_G']}")
+			print("Available items:")
+			for item, quantity in shop_stock.items():
+				print(f"{item.capitalize()} - {item_prices[item]}G (x{quantity})")
 			buy_item = input("Which item will you buy? (Enter name or 'cancel' to leave): ").strip().lower()
-			if buy_item in avail_items and avail_items[buy_item]["quantity"] > 0:
-				item = avail_items[buy_item]
+			if buy_item in shop_stock and shop_stock[buy_item] > 0:
 				while True: # so player atk doesn't scale infinitely, limit atk ups but make potions practically unlimited
 					try:
-						quantity = int(input(f"How many {buy_item}s would you like to buy? (Available: {item['quantity']})"))
-						total_cost = item["price"] * quantity
+						quantity = int(input(f"How many {buy_item}s would you like to buy? (Available: {shop_stock[buy_item]}): "))
+						total_cost = item_prices[buy_item] * quantity
 						if quantity <= 0:
 							print("That's an invalid quantity. Enter quantity again.")
-						elif quantity > item["quantity"]:
+						elif quantity > shop_stock[buy_item]:
 							print("There is not enough of that item in stock. Try again.")
-						elif player["current_G"] < total_cost
+						elif player["current_G"] < total_cost:
 							print("You don't have enough G. Returning to the main shop menu.")
 							break
 						else:
 							# complete the transaction
-							shop_stock -= quantity
+							shop_stock[buy_item] -= quantity
 							player["current_G"] -= total_cost
 							if buy_item in player["inventory"]:
 								player["inventory"][buy_item] += quantity
 							else:
 								player["inventory"][buy_item] = quantity
-							print(f"You purchased {quantity} {buy_item}(s) for {item['price'] * quantity}G!")
+							print(f"You purchased {quantity} {buy_item}(s) for {total_cost}G!")
 							print(f"G left: {player['current_G']}")
 							break
 					except ValueError:
@@ -340,24 +345,25 @@ def showShop(world, player):
 			if sell_item not in player["inventory"] or player["inventory"][sell_item] <= 0:
 				print("You don't have that item in your inventory.")
 				continue
-			sell_price = avail_items[sell_item]["price"] // 2 # items sell for half their purchase price
+			sell_price = item_prices[sell_item] // 2 # items sell for half their purchase price
 			while True:
 				try:
-					sell_quantity = int(input(f"How many {sell_item}s will you sell? (You have: {player['inventory'][sell_item]}): "))
+					sell_quantity = int(input(f"How many {sell_item}s will you sell? Enter '0' to cancel and return to option select.\n(You have: {player['inventory'][sell_item]}): "))
 					if sell_quantity <= 0:
-						print("Invalid quantity. Enter number of items you want to sell again.")
+						break
 					elif sell_quantity > player["inventory"][sell_item]:
 						print("You don't have that many of that item to sell. Try again.")
 					else:
+						new_stock = shop_stock[sell_item] + sell_quantity
+						if new_stock > max_shop_stock[sell_item]:
+							print(f"The shop cannot hold more than {max_shop_stock[sell_item]} {sell_item}s.\nPlease sell fewer {sell_item}s.")
+							continue
 						# complete the sale
 						if sell_quantity == player["inventory"][sell_item]:
 							del player["inventory"][sell_item] # remove item entirely if all are sold
 						else:
 							player["inventory"][sell_item] -= sell_quantity
-						if sell_item in avail_items:
-							avail_items[sell_item]["quantity"] += sell_quantity
-						else:
-							avail_items[sell_item] = {"price": sell_price * 2, "quantity": sell_quantity}
+						shop_stock[sell_item] += sell_quantity
 						player["current_G"] += sell_price * sell_quantity
 						print(f"You sold {sell_quantity} {sell_item}(s) for {sell_price * sell_quantity}G!")
 						print(f"G left: {player['current_G']}")		
@@ -372,7 +378,6 @@ def showShop(world, player):
 			break
 		else:
 			print("Invaild action. Try again.")
-	item["quantity"] = shop_stock
 
 def showTavern(world, player):
 	print("You walk through the tavern door and enter a firelit room bustling with adventurers.")
