@@ -6,11 +6,15 @@ from final_project_gameTools import *
 # returns: player (for updating player["HP"])		
 def battle(player, enemy):
 	print(f"\nA {enemy['name']} appears!")
-	enemy_hp = int(enemy["maxhp"])  # make sure maxhp is an int
+	enemy_hp = int(enemy["hp"])  # make sure hp is an int
+	enemy_maxhp = int(enemy["maxhp"]) # do the same for maxhp
 	player_hp = player["HP"]
+	if "blade of cinders" in player["held_weapon"]:
+		enemy_maxhp += 20
+		enemy_hp += 20
 	while enemy_hp > 0 and player_hp > 0:
 		print(f"\n{player['name']}'s HP: {player_hp}/{player['maxHP']}")
-		print(f"{enemy['name']}'s HP: {enemy_hp}/{enemy['maxhp']}")
+		print(f"{enemy['name']}'s HP: {enemy_hp}/{enemy_maxhp}")
 		action = input("What will you do? (1: Attack; 2: Use item): ").strip().lower()
 		if "shield" in player["inventory"]:
 			player["def"] = 10
@@ -20,10 +24,14 @@ def battle(player, enemy):
 		if "blade of cinders" in player["held_weapon"]:
 			weapon_dmg = 15
 		if action == "1":
-			atk_dmg = diceRoll("2d6")
-			atk_dmg = sum(atk_dmg) + weapon_dmg + player["atk"] # take the sum of the values inside rolls_list, convert to int and then add the base weapon dmg and player's base dmg (0 if no atk ups have been used) to calculate total atk dmg
-			print(atk_dmg)
-			enemy_hp -= atk_dmg
+			if "blade of cinders" not in player["held_weapon"]:
+				atk_dmg = diceRoll("2d6")
+				atk_dmg = sum(atk_dmg) + weapon_dmg + player["atk"] # take the sum of the values inside rolls_list, convert to int and then add the base weapon dmg and player's base dmg (0 if no atk ups have been used) to calculate total atk dmg
+				enemy_hp -= atk_dmg
+			elif "blade of cinders" in player["held_weapon"]:
+				atk_dmg = diceRoll("5d4")
+				atk_dmg = sum(atk_dmg) + player["atk"]
+				enemy_hp -= atk_dmg
 			print(f"You attack and deal {atk_dmg} damage to the {enemy['name']}!")
 		elif action == "2":
 			if not player["inventory"]:
@@ -77,8 +85,12 @@ def battle(player, enemy):
 		# enemy's turn
 		enemy_atk_roll = random.randint(1,3)
 		if enemy_atk_roll == 1:
-			enemy_atk_dmg = diceRoll("2d10")
-			enemy_atk_dmg = sum(enemy_atk_dmg)
+			if "blade of cinders" not in player["held_weapon"]:
+				enemy_atk_dmg = diceRoll("2d10")
+				enemy_atk_dmg = sum(enemy_atk_dmg)
+			elif "blade of cinders" in player["held_weapon"]:
+				enemy_atk_dmg = diceRoll("3d10")
+				enemy_atk_dmg = sum(enemy_atk_dmg)
 			if "shield" in player["inventory"] and enemy_atk_dmg < player["def"]:
 				player_hp -= 0
 				print(f"The {enemy['name']} tries to attack but your shield blocks the damage!")
@@ -175,6 +187,7 @@ def showCavern(world, player):
 				"name": name, 
 				"loc": loc, 
 				"maxhp": int(maxhp),
+				"hp": int(maxhp),
 				"reward": int(reward)
 			}
 	while current_room <= max_rooms:
@@ -402,5 +415,7 @@ def showTavern(world, player):
 		print("You leave the tavern and return to the town square.")
 		world["loc"] = "town_square"
 	player["HP"] = player_hp
-
-
+	
+def showOminousDungeon(world, player):
+	print("You ")
+	return
