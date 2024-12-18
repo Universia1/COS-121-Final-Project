@@ -23,6 +23,8 @@ def battle(player, enemy):
 			weapon_dmg = 3 
 		if "blade of cinders" in player["held_weapon"]:
 			weapon_dmg = 15
+		if "celestial blade" in player["held_weapon"]:
+			weapon_dmg = 50
 		if action == "1":
 			if "blade of cinders" not in player["held_weapon"]:
 				atk_dmg = diceRoll("2d6")
@@ -68,6 +70,13 @@ def battle(player, enemy):
 					if player["inventory"]["maxhp up"] == 0:
 						del player["inventory"]["maxhp up"]
 					continue
+				elif item_choice == "def up" and "def up" in player["inventory"]:
+					print("You used a def up. Your defense went up by 5!")
+					player["def"] += 5
+					player["inventory"]["def up"] -= 1
+					if player["inventory"]["def up"] == 0:
+						del player["inventory"]["def up"]
+					continue
 				else:
 					print("Invalid input. Try again.")
 					continue
@@ -93,13 +102,16 @@ def battle(player, enemy):
 				enemy_atk_dmg = sum(enemy_atk_dmg)
 			if "shield" in player["inventory"] and enemy_atk_dmg < player["def"]:
 				player_hp -= 0
-				print(f"The {enemy['name']} tries to attack but your shield blocks the damage!")
+				print(f"The {enemy['name']} tries to attack but your shield blocks all the damage!")
 			elif "shield" in player["inventory"] and enemy_atk_dmg > player["def"]:
 				player_hp -= enemy_atk_dmg - player["def"]
 				print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg} damage but your shield blocked 10 dmg!")
 			elif "shield" not in player["inventory"]:
-				player_hp -= enemy_atk_dmg
-				print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg} damage!")
+				player_hp -= enemy_atk_dmg - player["def"]
+				if enemy_atk_dmg >= player["def"]:
+					print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg - player['def']} damage!")
+				else:
+					print(f"The {enemy['name']} attacks but your sheer toughness blocks all the damage!\nYou take 0 damage.")
 		else:
 			print(f"The {enemy['name']} tries to attack but misses!")
 		if player_hp <= 0:
@@ -120,7 +132,7 @@ def showTown(world, player):
 	if "blade of cinders" not in player["held_weapon"]:
 		print("\nTo the East there is a cave said to hold the fabled 'Blade of Cinders'.")
 	else:
-		print("\nTo the East lies the cave where you got the Blade of Cinders.\nYou can still travel there and explore!")
+		print("\nTo the East lies the cave where you got the Blade of Cinders.\nYou can still travel there and explore, but beware: the enemies there have become stronger!")
 	print("\nTo the West, there is an ominous dungeon.")
 
 	while True:
@@ -254,13 +266,9 @@ def showCavern(world, player):
 							current_room += 1
 							break
 						elif next_step == "2":
-							if current_room == 1:
 								print("You return to the town square.")
 								world["loc"] = "town_square"
 								return
-							else:
-								current_room -= 1
-								break
 						else:
 							print("Invalid action. Try again.")
 							
@@ -279,6 +287,7 @@ def initializeShopStock():
 	return {
 	"health potion": 999,
 	"atk up": 5,
+	"def up": 5,
 	"maxhp up": 5,
 	"shield": 1
 	}
@@ -292,14 +301,16 @@ def showShop(world, player):
 	item_prices = {
 		"health potion": 5,
 		"atk up": 20,
-		"shield": 60,
-		"maxhp up": 30
+		"def up": 25,
+		"maxhp up": 30,
+		"shield": 60
 	}
 	
 	max_shop_stock = {
 		"health potion": 999,
 		"atk up": 5,
-		"maxhp up": 5,
+		"def up": 10,
+		"maxhp up": 10,
 		"shield": 1
 	}
 	
@@ -417,5 +428,19 @@ def showTavern(world, player):
 	player["HP"] = player_hp
 	
 def showOminousDungeon(world, player):
-	print("You ")
+	if "celestial blade" not in player["held_weapon"]:
+		print("You arrive at the entrance of the ominous dungeon, but it is sealed shut by a magical barrier.\nYou hear a faint voice emanate from the barrier. It says:")
+		print("'Fateful traveler, a terribly evil being slumbers in this dungeon.\nIf you wish to destroy this barrier and wake the being from his eternal slumber, you must first slay 100 enemies in the cavern'.")
+	else:
+		print("You arrive at the entrance of the ominous dungeon.\nYou reach out and touch the barrier...")
+		print("The barrier shatters and you hear countless screams of pain and terror as a terribly frigid wind rushes out of the dungeon entrance.")
+		print("You then hear a distant, earth-shaking groan from deep within the dungeon.")
+		print("What will you do?")
+		options = ["enter", "go back"]
+		decision = getValidInput(options)
+		if decision == "enter":
+			# continue this and create a function that makes use of cave enemy batle mechanics, but specifically for the final boss
+		elif decision = "go back":
+			print("You decide to go back to the town square.")
+			world["loc"] = "town_square"
 	return
