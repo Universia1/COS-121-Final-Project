@@ -24,5 +24,4 @@ def diceRoll(roll_str):
 	# if input is invaild (causes a ValueError) returns empty list
 	except ValueError:
 		return []
-		
 	return roll_str
