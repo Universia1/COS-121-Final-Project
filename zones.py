@@ -545,7 +545,6 @@ def showOminousDungeon(world, player):
 		options = ["enter", "go back"]
 		decision = getValidInput(options)
 		if decision == "enter":
-			# continue this and create a function that makes use of cave enemy batle mechanics, but specifically for the final boss
 			final_battle = finalBoss(player)
 		if decision == "go back":
 			print("You decide to go back to the town square.")
