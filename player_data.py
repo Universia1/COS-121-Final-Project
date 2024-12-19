@@ -22,8 +22,10 @@ def createPlayer():# dictionary that contains all player information
 		"maxHP": 50,
 		"HP": 50,
 		"held_weapon": ["basic stick"],
-		"current_G": 0,
-		"base_atk": 0,
+		"current_G": 0, 
+		"atk": 0,
+		"def": 0,
+		"enemy_slain": 0, 
 		"inventory": {
 			
 		}
@@ -31,9 +33,11 @@ def createPlayer():# dictionary that contains all player information
 			
 	return player
 	
-# function to load player data from a text file
+# function to save player data to txt file upon death
 def playerDeath(world, player):
 	with open("current_data.txt", "a") as file:
-		save_player = file.write(f"Final player data: player name: {player['name']}, player inventory: {player['inventory']}, G: {player['current_G']}, base atk: {player['base_atk']}, held weapon: {player['held_weapon']}\n")
-		
+		save_player = file.write(f"\nFinal player data: player name: {player['name']}\nplayer inventory: {player['inventory']}\nG: {player['current_G']}\natk: {player['atk']}\ndef: {player['def']}\nheld weapon: {player['held_weapon']}\nenemies slain: {player['enemy_slain']}\n")
 
+def gameWinSave(world, player):
+	with open("current_data.txt", "a") as file:
+		save_player = file.write(f"\nFinal player data: player name: {player['name']}\nplayer inventory: {player['inventory']}\nG: {player['current_G']}\natk: {player['atk']}\ndef: {player['def']}\nheld weapon: {player['held_weapon']}\nenemies slain: {player['enemy_slain']}\n")
