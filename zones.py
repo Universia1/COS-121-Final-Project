@@ -1,12 +1,17 @@
 from player_data import *
 from final_project_gameTools import *
 		
+# this file contains all functions relating to the 5 zones in the game: town square, shop, tavern, cave, final dungeon
+# there is also a function for using items (applied to using items inside and outside of battle), a battle function for regular enemies in the cave, a battle function for the final boss fight, a function for validating action/decision inputs (not used very much because it was implemented later into the coding process), a function for selecting enemy spawns in the cave depending on a 1:3 rng roll, and a function that maintains shop's item stock (if an item is bought, the remaining buyable number of that item is permenantly reduced until the player sells an item to the shop)
+		
 # function for using items in battle and in town square before battle
 # parameters: player
 # returns: nothing
 def useItem(player):
 	print("Which item will you use? (Enter 'cancel' if you don't want to use an item)")
-	print("The shield automatically increases your def to 10. It is not a consumable item.")
+	if "shield" in player["inventory"]:
+		player["def"] += 10
+		print("The shield automatically increases your def to 10. It is not a consumable item.")
 	options = []
 	for item in player["inventory"]:
 		options.append(item)
@@ -24,7 +29,6 @@ def useItem(player):
 				break
 			elif num_used > 0 and player["inventory"][item_choice] > 0:
 				heal_amount = 15 * num_used
-				#old_hp = player["HP"]  # store old HP before healing
 				player["HP"] = min(player["HP"] + heal_amount, player["maxHP"])  # heal without exceeding max HP
 				print(f"You used {num_used} {item_choice}(s) and healed {heal_amount} HP!")
 				player["inventory"][item_choice] -= num_used
@@ -37,8 +41,8 @@ def useItem(player):
 				print(f"You decided to not use a(n) {item_choice}.")
 				break
 			elif num_used > 0 and player["inventory"][item_choice] > 0:
-				atk_increase = player["atk"] + 5 * num_used
-				print(f"You used {num_used} {item_choice}(s) and your atk was increased by {atk_increase} points!")
+				player["atk"] += 5 * num_used
+				print(f"You used {num_used} {item_choice}(s) and your atk was increased by {5 * num_used} points!")
 				player["inventory"][item_choice] -= num_used
 				if player["inventory"][item_choice] == 0:
 					del player["inventory"][item_choice]
@@ -49,8 +53,8 @@ def useItem(player):
 				print(f"You decided to not use a(n) {item_choice}.")
 				break
 			elif num_used > 0 and player["inventory"][item_choice] > 0:
-				def_increase = player["def"] + 5 * num_used
-				print(f"You used {num_used} {item_choice}(s) and your def was increased by {def_increase} points!")
+				player["def"] += 5 * num_used
+				print(f"You used {num_used} {item_choice}(s) and your def was increased by {5 * num_used} points!")
 				player["inventory"][item_choice] -= num_used
 				if player["inventory"][item_choice] == 0:
 					del player["inventory"][item_choice]
@@ -60,9 +64,8 @@ def useItem(player):
 			if num_used == 0:
 				print(f"You decided to not use a(n) {item_choice}.")
 			elif num_used > 0 and player["inventory"][item_choice] > 0:
-				maxhp_increase = 10 * num_used
-				player["maxHP"] += maxhp_increase
-				print(f"You used {num_used} {item_choice}(s) and your max HP was increased by {maxhp_increase}!")
+				player["maxHP"] += 10 * num_used
+				print(f"You used {num_used} {item_choice}(s) and your max HP was increased by {10 * num_used}!")
 				player["inventory"][item_choice] -= num_used
 				if player["inventory"][item_choice] == 0:
 					del player["inventory"][item_choice]
@@ -117,7 +120,7 @@ def battle(player, enemy):
 				player = useItem(player)
 			elif use_item == "n":
 				print("You decided to not use any items.")
-				break
+				continue
 		if enemy_hp <= 0:
 			print(f"You defeated the {enemy['name']}!")
 			print(f"You gained {enemy['reward']} G!")
@@ -133,18 +136,12 @@ def battle(player, enemy):
 			elif "blade of cinders" in player["held_weapon"]:
 				enemy_atk_dmg = diceRoll("3d10")
 				enemy_atk_dmg = sum(enemy_atk_dmg)
-			if "shield" in player["inventory"] and enemy_atk_dmg < player["def"]:
+			if enemy_atk_dmg < player["def"]:
 				player["HP"] -= 0
-				print(f"The {enemy['name']} tries to attack but your shield blocks all the damage!")
-			elif "shield" in player["inventory"] and enemy_atk_dmg > player["def"]:
+				print(f"The {enemy['name']} attacks for {enemy_atk_dmg} damage, but your sheer toughness blocks all the damage!")
+			elif enemy_atk_dmg > player["def"]:
 				player["HP"] -= enemy_atk_dmg - player["def"]
-				print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg} damage but your shield blocked 10 dmg!")
-			elif "shield" not in player["inventory"]:
-				player["HP"] -= enemy_atk_dmg - player["def"]
-				if enemy_atk_dmg >= player["def"]:
-					print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg - player['def']} damage!")
-				else:
-					print(f"The {enemy['name']} attacks but your sheer toughness blocks all the damage!\nYou take 0 damage.")
+				print(f"The {enemy['name']} attacks and deals {enemy_atk_dmg - player['def']} damage!")
 		else:
 			print(f"The {enemy['name']} tries to attack but misses!")
 		if player["HP"] <= 0:
@@ -161,12 +158,12 @@ def battle(player, enemy):
 # returns the whole function
 def showTown(world, player):
 	print("\nYou are in the main town square, this is your home base.")
-	print("\nAround you, there is a tavern and a shop to buy/sell items.")
+	print("\nAround you, there is a tavern where you can fully restore your HP for 20G and a shop to buy/sell items.")
 	if "blade of cinders" not in player["held_weapon"]:
 		print("\nTo the East there is a cave said to hold the fabled 'Blade of Cinders'.")
 	else:
 		print("\nTo the East lies the cave where you got the Blade of Cinders.\nYou can still travel there and explore, but beware: the enemies there have become stronger!")
-	print("\nTo the West, there is an ominous dungeon.")
+	print("To the West, there is an ominous dungeon.")
 	while True:
 		movement_input = input("Where will you go? (Tavern, Shop, East, or West) (Enter 'use item' to use items): ")
 		movement_input = movement_input.strip().lower()
@@ -513,7 +510,7 @@ def finalBoss(player):
 				player = useItem(player)
 			elif use_item == "n":
 				print("You decided to not use any items.")
-				break
+				continue
 		else:
 			print("Invalid action. Try again.")
 		if enemy_atkRoll == 1:
@@ -534,10 +531,10 @@ def finalBoss(player):
 def showOminousDungeon(world, player):
 	if "celestial blade" not in player["held_weapon"]:
 		print("You arrive at the entrance of the ominous dungeon, but it is sealed shut by a magical barrier.\nYou hear a faint voice emanate from the barrier. It says:")
-		print("'Fateful traveler, a terribly evil being slumbers in this dungeon. If you wish to destroy this barrier and wake the being from his eternal slumber, you must first slay 100 enemies in the cavern'.")
+		print(f"'Fateful traveler, a terribly evil being slumbers in this dungeon. If you wish to destroy this barrier and wake the being from his eternal slumber, you must first slay 100 enemies in the cavern'. You must slay {100 - player['enemy_slain']} more enemies before you can destroy the barrier.")
 		print("You are warped back to the town square.")
 		world["loc"] = "town_square"
-	else:
+	elif "celestial blade" in player["held_weapon"]:
 		print("You arrive at the entrance of the ominous dungeon.\nYou reach out and touch the barrier...")
 		print("The barrier shatters and you hear countless screams of pain and terror as a terribly frigid wind rushes out of the dungeon entrance.")
 		print("You then hear a distant, earth-shaking groan from deep within the dungeon.")
@@ -549,3 +546,4 @@ def showOminousDungeon(world, player):
 		if decision == "go back":
 			print("You decide to go back to the town square.")
 			world["loc"] = "town_square"
+			return
