@@ -9,9 +9,6 @@ from final_project_gameTools import *
 # returns: nothing
 def useItem(player):
 	print("Which item will you use? (Enter 'cancel' if you don't want to use an item)")
-	if "shield" in player["inventory"]:
-		player["def"] += 10
-		print("The shield automatically increases your def to 10. It is not a consumable item.")
 	options = []
 	for item in player["inventory"]:
 		options.append(item)
@@ -59,10 +56,23 @@ def useItem(player):
 				if player["inventory"][item_choice] == 0:
 					del player["inventory"][item_choice]
 				break
+		elif item_choice == "shield" and item_choice in player["inventory"]:
+			num_used = int(input(f"How many {item_choice}s do you want to use? (Enter '0' to cancel): "))
+			if num_used == 0:
+				print(f"You decided to not use a {item_choice}.")
+				break
+			elif num_used > 0 and player["inventory"][item_choice] > 0:
+				player["def"] += 10
+				print(f"You used {num_used} {item_choice}(s) and your defense was increased by 10 points!")
+				player["inventory"][item_choice] -= num_used
+				if player["inventory"][item_choice] == 0:
+					del player["inventory"][item_choice]
+				break
 		elif item_choice == "maxhp up" and item_choice in player["inventory"]:
 			num_used = int(input(f"How many {item_choice}s do you want to use? (Enter '0' to cancel): "))
 			if num_used == 0:
 				print(f"You decided to not use a(n) {item_choice}.")
+				break
 			elif num_used > 0 and player["inventory"][item_choice] > 0:
 				player["maxHP"] += 10 * num_used
 				print(f"You used {num_used} {item_choice}(s) and your max HP was increased by {10 * num_used}!")
@@ -89,8 +99,6 @@ def battle(player, enemy):
 		print(f"\n{player['name']}'s HP: {player['HP']}/{player['maxHP']}")
 		print(f"{enemy['name']}'s HP: {enemy_hp}/{enemy_maxhp}")
 		action = input("What will you do? (1: Attack; 2: Use item): ").strip().lower()
-		if "shield" in player["inventory"]:
-			player["def"] = 10
 		weapon_dmg = 0
 		if "basic stick" in player["held_weapon"]:
 			weapon_dmg = 3 
@@ -492,8 +500,6 @@ def finalBoss(player):
 		weapon_dmg = 30
 		atk_dmg = diceRoll("2d20")
 		atk_dmg = sum(atk_dmg) + weapon_dmg + player["atk"]
-		if "shield" in player["inventory"]:
-			player["def"] = 10
 		action = input("What will you do? (1: Attack; 2: Use item): ").strip().lower()
 		if action == "1":
 			print(f"You attack the {fallen_titan['name']}, dealing {atk_dmg} damage!")
