@@ -172,6 +172,9 @@ def showTown(world, player):
 	else:
 		print("\nTo the East lies the cave where you got the Blade of Cinders.\nYou can still travel there and explore, but beware: the enemies there have become stronger!")
 	print("To the West, there is an ominous dungeon.")
+	print(f"Your current G: {player['current_G']}")
+	if player["HP"] < player["maxHP"]:
+		print(f"Your HP after battle: {player['HP']}")
 	while True:
 		movement_input = input("Where will you go? (Tavern, Shop, East, or West) (Enter 'use item' to use items): ")
 		movement_input = movement_input.strip().lower()
