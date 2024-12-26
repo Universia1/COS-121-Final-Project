@@ -1,0 +1,4 @@
+loc,enemy_name,maxhp,gold_reward
+cave,skeleton,30,25
+cave,spider,25,15
+cave,bat,15,5
